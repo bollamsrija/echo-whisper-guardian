@@ -5,31 +5,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { fetchReport } from '@/lib/api';
 
 const ReportTracker = () => {
   const { toast } = useToast();
   const [referenceCode, setReferenceCode] = useState('');
   const [loading, setLoading] = useState(false);
-  const [report, setReport] = useState<null | {
-    id: string;
-    status: string;
-    lastUpdated: string;
-    updates: Array<{ date: string; message: string }>;
-  }>(null);
+  const [report, setReport] = useState(null);
 
-  // Mock data for demo purposes
-  const mockReport = {
-    id: 'ABC123XY',
-    status: 'Under Review',
-    lastUpdated: '2025-04-20',
-    updates: [
-      { date: '2025-04-20', message: 'Your report has been assigned to an investigator.' },
-      { date: '2025-04-18', message: 'Your report has been received and is being assessed.' },
-      { date: '2025-04-15', message: 'Report submitted successfully.' }
-    ]
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!referenceCode.trim()) {
@@ -43,12 +27,12 @@ const ReportTracker = () => {
     
     setLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const reportData = await fetchReport(referenceCode);
       setLoading(false);
       
-      if (referenceCode.toUpperCase() === 'ABC123XY') {
-        setReport(mockReport);
+      if (reportData) {
+        setReport(reportData);
       } else {
         toast({
           title: "Report not found",
@@ -57,7 +41,14 @@ const ReportTracker = () => {
         });
         setReport(null);
       }
-    }, 1500);
+    } catch (error) {
+      setLoading(false);
+      toast({
+        title: "Error retrieving report",
+        description: "There was a problem retrieving your report. Please try again later.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

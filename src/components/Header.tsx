@@ -27,6 +27,9 @@ const Header = () => {
           <Link to="/resources" className="hover:text-whistleblower-accent transition-colors">
             Resources
           </Link>
+          <Link to="/admin" className="hover:text-whistleblower-accent transition-colors">
+            Admin
+          </Link>
         </nav>
         <div className="flex items-center space-x-2">
           <Button variant="outline" size="sm" className="bg-transparent border-white text-white hover:bg-white hover:text-whistleblower-primary">
