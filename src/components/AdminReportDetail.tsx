@@ -19,10 +19,12 @@ const statusOptions = [
   'Investigation',
   'Closed',
   'Rejected'
-];
+] as const;
+
+type StatusType = typeof statusOptions[number];
 
 const AdminReportDetail: React.FC<AdminReportDetailProps> = ({ report, onStatusUpdate, onBack }) => {
-  const [newStatus, setNewStatus] = useState(report.status);
+  const [newStatus, setNewStatus] = useState<StatusType>(report.status);
   const [updateMessage, setUpdateMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -39,6 +41,13 @@ const AdminReportDetail: React.FC<AdminReportDetailProps> = ({ report, onStatusU
       setUpdateMessage('');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  // This function ensures type safety when setting the status
+  const handleStatusChange = (value: string) => {
+    if (statusOptions.includes(value as StatusType)) {
+      setNewStatus(value as StatusType);
     }
   };
 
@@ -135,7 +144,7 @@ const AdminReportDetail: React.FC<AdminReportDetailProps> = ({ report, onStatusU
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="status">New Status</Label>
-                <Select value={newStatus} onValueChange={setNewStatus}>
+                <Select value={newStatus} onValueChange={handleStatusChange}>
                   <SelectTrigger id="status">
                     <SelectValue placeholder="Select new status" />
                   </SelectTrigger>
