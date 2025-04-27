@@ -1,13 +1,19 @@
 
 import { Report } from './models';
-import { getReportById, saveReport, getReports, updateReportStatus as updateReportStatusInStorage } from './localStorage';
+import { supabase } from './supabase';
 
 export const fetchReport = async (referenceCode: string): Promise<Report | null> => {
-  return getReportById(referenceCode.toUpperCase());
+  const { data, error } = await supabase
+    .from('reports')
+    .select('*')
+    .eq('id', referenceCode.toUpperCase())
+    .single();
+    
+  if (error || !data) return null;
+  return data as Report;
 };
 
 export const submitReport = async (reportData: Partial<Report>): Promise<{success: boolean, referenceCode?: string}> => {
-  // Generate a random reference code (8 characters, uppercase)
   const referenceCode = Math.random().toString(36).substring(2, 10).toUpperCase();
   
   const newReport: Report = {
@@ -30,18 +36,63 @@ export const submitReport = async (reportData: Partial<Report>): Promise<{succes
     files: reportData.files
   };
   
-  saveReport(newReport);
+  const { error } = await supabase
+    .from('reports')
+    .insert(newReport);
   
   return {
-    success: true,
-    referenceCode
+    success: !error,
+    referenceCode: !error ? referenceCode : undefined
   };
 };
 
 export const fetchAdminReports = async (): Promise<Report[]> => {
-  return getReports();
+  const { data, error } = await supabase
+    .from('reports')
+    .select('*')
+    .order('created_at', { ascending: false });
+    
+  if (error) throw error;
+  return data as Report[];
 };
 
 export const updateReportStatus = async (reportId: string, status: string, message: string): Promise<boolean> => {
-  return updateReportStatusInStorage(reportId, status, message);
+  // First get the current report to update its updates array
+  const { data: currentReport } = await supabase
+    .from('reports')
+    .select('updates')
+    .eq('id', reportId)
+    .single();
+    
+  if (!currentReport) return false;
+  
+  const today = new Date().toISOString().split('T')[0];
+  const updates = [
+    {
+      date: today,
+      message,
+      status
+    },
+    ...(currentReport.updates as any[] || [])
+  ];
+  
+  const { error } = await supabase
+    .from('reports')
+    .update({
+      status,
+      last_updated: today,
+      updates
+    })
+    .eq('id', reportId);
+    
+  return !error;
+};
+
+export const deleteReport = async (reportId: string): Promise<boolean> => {
+  const { error } = await supabase
+    .from('reports')
+    .delete()
+    .eq('id', reportId);
+    
+  return !error;
 };
