@@ -16,18 +16,18 @@ export const fetchReport = async (referenceCode: string): Promise<Report | null>
 export const submitReport = async (reportData: Partial<Report>): Promise<{success: boolean, referenceCode?: string}> => {
   const referenceCode = Math.random().toString(36).substring(2, 10).toUpperCase();
   
-  const newReport: Report = {
+  const newReport = {
     id: referenceCode,
     title: reportData.title || '',
     category: reportData.category || '',
     description: reportData.description || '',
     date: reportData.date,
     location: reportData.location,
-    personsInvolved: reportData.personsInvolved,
-    evidenceDescription: reportData.evidenceDescription,
+    persons_involved: reportData.personsInvolved,
+    evidence_description: reportData.evidenceDescription,
     status: 'Submitted',
-    lastUpdated: new Date().toISOString().split('T')[0],
-    createdAt: new Date().toISOString().split('T')[0],
+    last_updated: new Date().toISOString().split('T')[0],
+    created_at: new Date().toISOString().split('T')[0],
     updates: [{ 
       date: new Date().toISOString().split('T')[0], 
       message: 'Report submitted successfully.',
@@ -36,9 +36,13 @@ export const submitReport = async (reportData: Partial<Report>): Promise<{succes
     files: reportData.files
   };
   
+  console.log("Submitting report to Supabase:", newReport);
+  
   const { error } = await supabase
     .from('reports')
     .insert(newReport);
+  
+  console.log("Submission result:", error ? "Error: " + error.message : "Success");
   
   return {
     success: !error,

@@ -63,6 +63,8 @@ const ReportForm = () => {
     setLoading(true);
     
     try {
+      console.log("Starting report submission...");
+      
       const result = await submitReport({
         title: formData.title,
         description: formData.description,
@@ -70,16 +72,10 @@ const ReportForm = () => {
         date: formData.date,
         location: formData.location,
         personsInvolved: formData.personsInvolved,
-        evidenceDescription: formData.evidenceDescription,
-        status: 'Submitted',
-        lastUpdated: new Date().toISOString().split('T')[0],
-        createdAt: new Date().toISOString().split('T')[0],
-        updates: [{ 
-          date: new Date().toISOString().split('T')[0], 
-          message: 'Report submitted successfully.',
-          status: 'Submitted'
-        }]
+        evidenceDescription: formData.evidenceDescription
       });
+      
+      console.log("Submission result:", result);
       
       setLoading(false);
       
@@ -102,8 +98,11 @@ const ReportForm = () => {
         setCategory('');
         setFileAttached(false);
         setAnonymousUpdates(false);
+      } else {
+        throw new Error("Failed to submit report");
       }
     } catch (error) {
+      console.error("Error submitting report:", error);
       setLoading(false);
       toast({
         title: "Error submitting report",

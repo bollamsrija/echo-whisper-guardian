@@ -4,10 +4,10 @@ export interface Report {
   title: string;
   category: string;
   description: string;
-  date?: string;
-  location?: string;
-  personsInvolved?: string;
-  evidenceDescription?: string;
+  date?: string | null;
+  location?: string | null;
+  personsInvolved?: string | null;
+  evidenceDescription?: string | null;
   status: 'Submitted' | 'Under Review' | 'Investigation' | 'Closed' | 'Rejected';
   lastUpdated: string;
   createdAt: string;
@@ -16,7 +16,7 @@ export interface Report {
     message: string;
     status?: string;
   }>;
-  files?: string[];
+  files?: string[] | null;
 }
 
 export interface AdminUser {
